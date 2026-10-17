@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AgentInbox } from "../types";
 import { useInboxes } from "../hooks/use-inboxes";
 import { logger } from "../utils/logger";
+import { normalizeDeploymentUrl } from "../utils";
 
 export function EditAgentInboxDialog({
   agentInbox,
@@ -44,7 +45,7 @@ export function EditAgentInboxDialog({
       updateAgentInbox({
         ...agentInbox,
         graphId,
-        deploymentUrl,
+        deploymentUrl: normalizeDeploymentUrl(deploymentUrl),
         name,
       });
 

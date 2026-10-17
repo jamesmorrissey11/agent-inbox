@@ -15,16 +15,20 @@ import { useThreadsContext } from "../contexts/ThreadContext";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryParams } from "../hooks/use-query-params";
 import {
-  AGENT_INBOX_GITHUB_README_URL,
   NO_INBOXES_FOUND_PARAM,
   LANGCHAIN_API_KEY_LOCAL_STORAGE_KEY,
 } from "../constants";
 import { PasswordInput } from "@/components/ui/password-input";
-import { isDeployedUrl, fetchDeploymentInfo } from "../utils";
+import {
+  isDeployedUrl,
+  fetchDeploymentInfo,
+  normalizeDeploymentUrl,
+} from "../utils";
 import { useLocalStorage } from "../hooks/use-local-storage";
 import { LoaderCircle } from "lucide-react";
 import { logger } from "../utils/logger";
 import { AgentInbox } from "../types";
+import { WelcomeInboxDescription } from "./welcome-inbox-description";
 
 export function AddAgentInboxDialog({
   hideTrigger,
@@ -46,7 +50,7 @@ export function AddAgentInboxDialog({
   const { getItem } = useLocalStorage();
   const [open, setOpen] = React.useState(false);
   const [graphId, setGraphId] = React.useState("");
-  const [deploymentUrl, setDeploymentUrl] = React.useState("");
+  const [rawDeploymentUrl, setDeploymentUrl] = React.useState("");
   const [name, setName] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -72,6 +76,16 @@ export function AddAgentInboxDialog({
     setErrorMessage(null);
 
     try {
+      const deploymentUrl = normalizeDeploymentUrl(rawDeploymentUrl);
+      try {
+        new URL(deploymentUrl);
+      } catch {
+        setErrorMessage(
+          "Please enter a valid deployment URL, e.g. http://localhost:2024"
+        );
+        setIsSubmitting(false);
+        return;
+      }
       const isDeployed = isDeployedUrl(deploymentUrl);
       let inboxId = uuidv4();
       let fetchedTenantId: string | undefined | null = undefined;
@@ -166,7 +180,9 @@ export function AddAgentInboxDialog({
     }
   };
 
-  const isDeployedGraph = isDeployedUrl(deploymentUrl);
+  const isDeployedGraph = isDeployedUrl(
+    normalizeDeploymentUrl(rawDeploymentUrl)
+  );
   const showLangChainApiKeyField =
     (noInboxesFoundParam === "true" || isDeployedGraph) &&
     langchainApiKey !== undefined &&
@@ -193,19 +209,7 @@ export function AddAgentInboxDialog({
           <DialogHeader>
             <DialogTitle>Welcome to the Agent Inbox!</DialogTitle>
             <DialogDescription>
-              <p>To get started, please add an inbox below.</p>
-              <p>
-                Not sure where to start? Check out our docs
-                <a
-                  href={AGENT_INBOX_GITHUB_README_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-brand-500 hover:underline ml-1"
-                >
-                  here
-                </a>
-                .
-              </p>
+              <WelcomeInboxDescription />
             </DialogDescription>
           </DialogHeader>
         ) : (
@@ -245,10 +249,10 @@ export function AddAgentInboxDialog({
             </p>
             <Input
               id="deployment-url"
-              placeholder="https://my-agent.default.us.langgraph.app"
+              placeholder="http://localhost:2024 or https://my-agent.default.us.langgraph.app"
               className="col-span-3"
               required
-              value={deploymentUrl}
+              value={rawDeploymentUrl}
               onChange={(e) => setDeploymentUrl(e.target.value)}
             />
           </div>

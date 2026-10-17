@@ -15,6 +15,18 @@ export function prettifyText(action: string) {
 }
 
 /**
+ * Trims whitespace and trailing slashes, and defaults to http:// when no scheme is given
+ * (e.g. "localhost:2024" -> "http://localhost:2024"). Returns "" for empty input.
+ */
+export function normalizeDeploymentUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, "");
+  if (!trimmed) {
+    return "";
+  }
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
+}
+
+/**
  * Determines if a URL is a deployed (cloud) URL.
  */
 export function isDeployedUrl(url: string): boolean {

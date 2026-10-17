@@ -44,11 +44,11 @@ function ArgsRenderer({ args }: { args: Record<string, any> }) {
             <p className="text-sm leading-[18px] text-gray-600 text-wrap">
               {prettifyText(k)}:
             </p>
-            <span className="text-[13px] leading-[18px] text-black bg-zinc-100 rounded-xl p-3 w-full max-w-full">
+            <div className="text-[13px] leading-[18px] text-black bg-zinc-100 rounded-xl p-3 w-full max-w-full">
               <MarkdownText className="text-wrap break-all break-words whitespace-pre-wrap">
                 {value}
               </MarkdownText>
-            </span>
+            </div>
           </div>
         );
       })}

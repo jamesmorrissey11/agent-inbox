@@ -25,6 +25,7 @@ import {
   processInterruptedThread,
   processThreadWithoutInterrupts,
 } from "./utils";
+import { normalizeDeploymentUrl } from "../utils";
 import { useLocalStorage } from "../hooks/use-local-storage";
 import { useInboxes } from "../hooks/use-inboxes";
 import { logger } from "../utils/logger";
@@ -81,7 +82,12 @@ const getClient = ({ agentInboxes, getItem, toast }: GetClientArgs) => {
     });
     return;
   }
-  const deploymentUrl = agentInboxes.find((i) => i.selected)?.deploymentUrl;
+  const storedDeploymentUrl = agentInboxes.find(
+    (i) => i.selected
+  )?.deploymentUrl;
+  const deploymentUrl = storedDeploymentUrl
+    ? normalizeDeploymentUrl(storedDeploymentUrl)
+    : undefined;
   if (!deploymentUrl) {
     toast({
       title: "Error",
